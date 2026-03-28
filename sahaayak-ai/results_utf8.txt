@@ -1,0 +1,9 @@
+﻿TYPE                      | STATUS     | SCORE | WHY (FIRST 2)
+--------------------------------------------------------------------------------
+Electricity Bill Scam     | Scam       | 85    | Utility service threat (e.g. electricity disconnection)., High urgency tone designed to pressure quick decisions.
+KYC/Bank Scam             | Scam       | 100   | Request for sensitive financial action or identity information., High urgency tone designed to pressure quick decisions.
+Part-time Job Scam        | Scam       | 97    | Involves part-time job or high-earning promise (common job scam signal)., High urgency tone designed to pressure quick decisions.
+Lottery/Reward Scam       | Scam       | 100   | Promise of unexpected financial gain or large reward., High overall scam score indicates critical risk signals.
+Parcel/Customs Scam       | Scam       | 100   | Authority impersonation or parcel-related fraud signals., Contains an external link, potentially a phishing vector.
+
+Batch test complete.
