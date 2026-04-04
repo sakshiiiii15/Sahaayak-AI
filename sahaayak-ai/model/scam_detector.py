@@ -25,17 +25,18 @@ def detect_scam(text):
         (r"(win|won|winner|lottery|prize|gift|reward|offer|kbc|congrats).*?(claim|click|collect|withdraw|redeem|soon)", 45),
         (r"(gift card|amazon|itunes|google play).*?(order|buy|urgent|ASAP|reimburse|meeting|send)", 60),
         (r"(customs|unclaimed|parcel|delivery|fine|police|seized|stuck|fedex|dhl).*?(pay|release|amount|account)", 40),
-        (r"(rupee|ruppee|rs|amount|money|cash).*?(withdraw|win|prize|claim|transfer|reward)", 40)
+        (r"(rupee|ruppee|rs|amount|money|cash).*?(withdraw|win|prize|claim|transfer|reward)", 40),
+        (r"(accident|hospital|emergency|police|arrest|jail|family|relative).*?(call|contact|number|help|money|pay|premium)", 65)
     ]
     for pattern, weight in templates:
         if re.search(pattern, normalized): score += weight
 
     # 2. Keyword Weighted Categories
     categories = {
-        "urgency": (["now", "immediately", "urgent", "asap", "hurry", "today", "deadline", "soon", "9.30", "tonight", "reimburse", "meeting"], 25),
+        "urgency": (["now", "immediately", "urgent", "asap", "hurry", "today", "deadline", "soon", "accident", "emergency", "arrest", "stuck"], 25),
         "banking": (["otp", "cvv", "pin", "password", "bank", "account", "transaction", "verify", "pan", "aadhar"], 15),
-        "phishing": (["click", "link", "visit", "open", "bit.ly", "tinyurl", "form", "claim", "redeem"], 15),
-        "scam_markers": (["gift card", "amazon", "congratulations", "lucky", "shortlisted", "exclusive", "bonus", "won", "winner", "lottery"], 15)
+        "phishing": (["click", "link", "visit", "open", "bit.ly", "tinyurl", "form", "claim", "redeem", "call this", "contact now"], 15),
+        "scam_markers": (["gift card", "amazon", "congratulations", "lucky", "shortlisted", "exclusive", "bonus", "won", "winner", "lottery", "premium rate", "payment needed"], 15)
     }
     found_categories = set()
     for cat, (keywords, weight) in categories.items():
