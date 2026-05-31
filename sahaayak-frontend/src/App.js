@@ -71,7 +71,7 @@ const LiquidMolecule = ({ x, y, isClicking, isPointer }) => {
       style={{ x, y }}
       className="absolute top-0 left-0 pointer-events-none flex items-center justify-center"
     >
-      {/* 🔮 Shared Energy Envelope (Surgical Aura) */}
+      {/* ­ƒö« Shared Energy Envelope (Surgical Aura) */}
       <motion.div
         animate={{ 
           scale: isClicking ? 0.4 : isPointer ? 1.4 : 1,
@@ -80,7 +80,7 @@ const LiquidMolecule = ({ x, y, isClicking, isPointer }) => {
         className="absolute w-10 h-10 bg-indigo-500/20 blur-xl rounded-full backdrop-blur-sm border border-white/5"
       />
 
-      {/* 🕸️ Plasma Bridge (SVG Links) */}
+      {/* ­ƒò©´©Å Plasma Bridge (SVG Links) */}
       <svg className="absolute w-24 h-24 overflow-visible" viewBox="-48 -48 96 96">
         <defs>
           <linearGradient id="plasmaGrad" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -99,7 +99,7 @@ const LiquidMolecule = ({ x, y, isClicking, isPointer }) => {
         />
       </svg>
 
-      {/* ⚛️ The Atoms (Minimalist Energy Points) */}
+      {/* ÔÜø´©Å The Atoms (Minimalist Energy Points) */}
       {coords.map((c, i) => (
         <motion.div
           key={i}
@@ -121,6 +121,45 @@ const App = () => {
   const [selectedHistoryItem, setSelectedHistoryItem] = useState(null);
   const [copyStatus, setCopyStatus] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
+  const [speechVoice, setSpeechVoice] = useState(null);
+
+  const DEMO_TEXT = "URGENT: Your electricity bill is overdue. Pay ₹2,900 now using the link below or your service will be disconnected today. Click https://bit.ly/power-pay to avoid penalty.";
+
+  const findBestHindiVoice = (voices) => {
+    const candidates = voices
+      .filter((voice) => /hi|hindi|in/i.test(`${voice.lang} ${voice.name} ${voice.voiceURI}`));
+
+    if (candidates.length > 0) {
+      const female = candidates.find((voice) => /female|woman|girl|aditi|shreya|lekha|neha/i.test(`${voice.name} ${voice.voiceURI}`));
+      return female || candidates[0];
+    }
+
+    const enIndia = voices.filter((voice) => /en-(?:in|gb|au|us)|english/i.test(`${voice.lang} ${voice.name} ${voice.voiceURI}`));
+    const femaleEnIndia = enIndia.find((voice) => /female|woman|girl|google/i.test(`${voice.name} ${voice.voiceURI}`));
+    return femaleEnIndia || voices[0] || null;
+  };
+
+  const loadSpeechVoice = () => {
+    if (!window.speechSynthesis) return;
+    const voices = window.speechSynthesis.getVoices();
+    if (!voices.length) return;
+    const bestVoice = findBestHindiVoice(voices);
+    if (bestVoice) setSpeechVoice(bestVoice);
+  };
+
+  useEffect(() => {
+    loadSpeechVoice();
+    window.speechSynthesis.onvoiceschanged = loadSpeechVoice;
+    return () => {
+      if (window.speechSynthesis) window.speechSynthesis.onvoiceschanged = null;
+    };
+  }, []);
+
+  const runDemo = async () => {
+    setText(DEMO_TEXT);
+    setFile(null);
+    await analyzeAll(DEMO_TEXT);
+  };
   
   const vantaRef = useRef(null);
   const scorecardRef = useRef(null);
@@ -257,9 +296,9 @@ const App = () => {
         
         // Store Divergent Physics metadata (Increased separation variance)
         mesh.userData = {
-          attractionWeight: 0.0005 + Math.random() * 0.002, // 80% Reduction for subtle influence
-          noiseScale: 0.8 + Math.random() * 2.5,          // Higher variance for separate paths
-          driftSpeed: 0.005 + Math.random() * 0.015,     // Boosted organic drift
+          attractionWeight: 0.0001 + Math.random() * 0.0003,  // Reduced for subtler mouse interaction
+          noiseScale: 0.8 + Math.random() * 1.2,              // Reduced variance for stability
+          driftSpeed: 0.001 + Math.random() * 0.003,          // Significantly reduced drift
           noisePhase: Math.random() * 5000,
           originalColor: blobColors[i],
           baseScale: size
@@ -290,29 +329,29 @@ const App = () => {
     };
     window.addEventListener('resize', handleResize);
 
-    // Animation Loop (Fluid Organic Liquid Physics)
+    // Animation Loop (Calm Liquid Physics)
     let animationFrameId;
     const animate = () => {
       animationFrameId = requestAnimationFrame(animate);
       
-      const time = Date.now() * 0.00025; // Slower, more velvety motion
+      const time = Date.now() * 0.0001; // Much slower motion for stability
       
       blobs.forEach((blob, index) => {
         const { attractionWeight, noiseScale, noisePhase, driftSpeed } = blob.userData;
 
-        // 1. INDEPENDENT Organic Movement (Random wandering)
-        blob.position.x += Math.sin(time * noiseScale + noisePhase) * driftSpeed;
-        blob.position.y += Math.cos(time * (noiseScale * 0.7) + noisePhase) * driftSpeed;
+        // 1. Very subtle organic drift (barely noticeable)
+        blob.position.x += Math.sin(time * noiseScale + noisePhase) * driftSpeed * 0.5;
+        blob.position.y += Math.cos(time * (noiseScale * 0.7) + noisePhase) * driftSpeed * 0.5;
 
-        // 2. SUBTLE Magnetic Attraction (Gentle nudge, no clumping)
-        const dx = (mouseX * 7.5) - blob.position.x;
-        const dy = (-mouseY * 4.5) - blob.position.y;
+        // 2. Minimal mouse attraction (very gentle)
+        const dx = (mouseX * 5) - blob.position.x;
+        const dy = (-mouseY * 3) - blob.position.y;
         
-        blob.position.x += dx * attractionWeight;
-        blob.position.y += dy * attractionWeight;
+        blob.position.x += dx * attractionWeight * 0.3;
+        blob.position.y += dy * attractionWeight * 0.3;
 
-        // 3. Calm Breathing (Very slow scale oscillation)
-        const scaleMod = 1 + Math.sin(time * 1.2 + index) * 0.15;
+        // 3. Very calm breathing (almost imperceptible)
+        const scaleMod = 1 + Math.sin(time * 0.6 + index) * 0.08;
         blob.scale.set(scaleMod, scaleMod, 1);
 
         // Keep within wide cinematic bounds
@@ -462,7 +501,7 @@ ${item.simplified}
         >
           {text.substring(seg.start, seg.end)}
           <span className="absolute bottom-full left-1/2 -translate-x-1/2 bg-slate-900/95 text-[10px] text-white px-3 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap mb-2 z-50 border border-red-500/30 shadow-xl backdrop-blur-md">
-            ⚠️ {seg.type.replace(/_/g, ' ')}
+            ÔÜá´©Å {seg.type.replace(/_/g, ' ')}
           </span>
         </motion.span>
       );
@@ -481,15 +520,19 @@ ${item.simplified}
   };
 
   const speakResult = (message) => {
-    if (!message) return;
+    if (!message || !window.speechSynthesis) return;
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(message);
-    utterance.lang = "hi-IN";
+    utterance.lang = speechVoice?.lang || "hi-IN";
+    if (speechVoice) utterance.voice = speechVoice;
+    utterance.rate = 1;
+    utterance.pitch = 1.1;
     window.speechSynthesis.speak(utterance);
   };
 
-  const analyzeAll = async () => {
-    if (!text.trim() && !file) return;
+  const analyzeAll = async (overrideText) => {
+    const textToAnalyze = overrideText ?? text;
+    if (!textToAnalyze.trim() && !file) return;
     setLoading(true);
     setResult(null);
     try {
@@ -499,11 +542,11 @@ ${item.simplified}
         data.append("file", file);
         res = await axios.post("http://127.0.0.1:5000/upload", data);
       } else {
-        res = await axios.post("http://127.0.0.1:5000/analyze", { text });
+        res = await axios.post("http://127.0.0.1:5000/analyze", { text: textToAnalyze });
       }
       setResult(res.data);
-      if (res.data.analyzed_text) setText(res.data.analyzed_text);
-      saveToHistory(res.data, res.data.analyzed_text || text || file?.name || "File Check");
+      setText(res.data.analyzed_text || textToAnalyze);
+      saveToHistory(res.data, res.data.analyzed_text || textToAnalyze || file?.name || "File Check");
       if (res.data.message) speakResult(res.data.message);
       
       // Auto-scroll to the new results after a short delay
@@ -539,16 +582,9 @@ ${item.simplified}
   return (
     <motion.div 
       initial={false}
-      animate={{ 
-        scale: result?.status === "Scam" ? [1, 1.002, 1] : 1,
-      }}
-      transition={{ 
-        duration: 1.5,
-        scale: result?.status === "Scam" ? { repeat: Infinity, duration: 2 } : { duration: 0.5 }
-      }}
       className="min-h-screen text-slate-200 font-sans p-4 md:p-8 flex flex-col items-center overflow-x-hidden relative bg-[#050508] cursor-none"
     >
-      {/* ⚛️ Unified Neural Core Liquid Cursor */}
+      {/* ÔÜø´©Å Unified Neural Core Liquid Cursor */}
       <div className="fixed top-0 left-0 w-full h-full pointer-events-none z-[10000]">
         <LiquidMolecule 
           x={springX} 
@@ -641,6 +677,9 @@ ${item.simplified}
         </div>
       </nav>
       </header>
+
+      {/* Scroll Blur Overlay - prevents content from being visible behind navbar */}
+      <div className="fixed top-0 left-0 right-0 h-10 z-20 pointer-events-none bg-gradient-to-b from-[rgba(5,5,8,0.95)] to-transparent backdrop-blur-lg" />
 
       <main className="w-full max-w-4xl mx-auto relative z-10 text-center md:text-left pt-24">
         <AnimatePresence mode="wait">
@@ -741,7 +780,7 @@ ${item.simplified}
                       onChange={(e) => setText(e.target.value)}
                       className="w-full h-40 bg-slate-950/30 border border-white/5 rounded-2xl p-6 text-lg text-slate-200 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all"
                     />
-                    <div className="flex justify-between items-center mt-4">
+                    <div className="flex justify-between items-center mt-4 gap-3">
                       <div className="flex gap-2 text-slate-500 items-center">
                         <label className="cursor-pointer hover:text-indigo-400 transition-colors flex items-center gap-1">
                           <FileText size={18} />
@@ -750,22 +789,31 @@ ${item.simplified}
                         </label>
                         {file && <span className="text-xs text-indigo-400 truncate max-w-[100px]">{file.name}</span>}
                       </div>
-                      <button 
-                        onClick={analyzeAll}
-                        disabled={loading}
-                        className="bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-700 text-white px-8 py-3 rounded-xl font-bold transition-all shadow-lg hover:shadow-indigo-500/25 flex items-center gap-2"
-                      >
-                        {loading ? <div className="loading-spinner w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Search size={20} />}
-                        <span>{loading ? "Analyzing..." : "Analyze Everything"}</span>
-                      </button>
-                      {(text || result) && (
-                        <button 
-                          onClick={() => { setText(""); setResult(null); setFile(null); }}
-                          className="px-4 py-3 rounded-xl border border-slate-700 hover:bg-white/5 text-slate-400 transition-all"
+                      <div className="flex gap-3 items-center">
+                        <button
+                          onClick={runDemo}
+                          disabled={loading}
+                          className="px-5 py-3 rounded-xl border border-slate-700 bg-slate-900/80 text-slate-100 hover:bg-slate-800 transition-all"
                         >
-                          Reset
+                          Demo Scam
                         </button>
-                      )}
+                        <button 
+                          onClick={() => analyzeAll()}
+                          disabled={loading}
+                          className="bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-700 text-white px-8 py-3 rounded-xl font-bold transition-all shadow-lg hover:shadow-indigo-500/25 flex items-center gap-2"
+                        >
+                          {loading ? <div className="loading-spinner w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Search size={20} />}
+                          <span>{loading ? "Analyzing..." : "Analyze Everything"}</span>
+                        </button>
+                        {(text || result) && (
+                          <button 
+                            onClick={() => { setText(""); setResult(null); setFile(null); }}
+                            className="px-4 py-3 rounded-xl border border-slate-700 hover:bg-white/5 text-slate-400 transition-all"
+                          >
+                            Reset
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
