@@ -8,8 +8,19 @@ import re
 import os
 import tempfile
 import base64
+import requests
 from PyPDF2 import PdfReader
 from PIL import Image
+
+def unroll_url(url):
+    try:
+        # Don't follow redirects too deep (prevent loops)
+        res = requests.head(url, allow_redirects=True, timeout=3)
+        final_url = res.url
+        is_suspicious = any(x in final_url.lower() for x in [".ru", ".cn", ".xyz", "verify-account", "login-bank"])
+        return final_url, is_suspicious
+    except:
+        return url, False
 import pytesseract
 import pyttsx3
 
@@ -65,6 +76,8 @@ def explain_reason(text, scam_score):
 
     # 1. Template Matching Patterns for Explanation
     patterns = {
+        r"accident|hospital|emergency|police|arrest|jail|family|relative": "Manipulation of emotions via reported family emergency or legal trouble.",
+        r"premium rate|090|098|0871|0844": "Contains a high-cost premium rate phone number for contact.",
         r"bank|account|pan|aadhar|kyc|otp|verify|withdraw|transfer": "Request for sensitive financial action or identity information.",
         r"bill|electricity|bijli|disconnect|cut": "Utility service threat (e.g. electricity disconnection).",
         r"part-time|job|earn|commission|salary": "Involves part-time job or high-earning promise (common job scam signal).",
@@ -102,6 +115,7 @@ def analyze_text(text):
         }
 
     cleaned_text = clean_text(text)
+    lower_text = text.lower()
     scam_score = detect_scam(cleaned_text)
     ai_score = detect_ai_text(cleaned_text)
 
@@ -112,15 +126,18 @@ def analyze_text(text):
     else:
         status = "Safe"
 
-    # 5. Link Intelligence (Mocked for Demo Logic)
+    # 5. Link Intelligence (REAL UNMASKING)
     link_intel = None
-    if re.search(r"http|https|bit\.ly|tinyurl", text.lower()):
-        # Mock logic: if registered recently or suspicious TLD
+    urls = re.findall(r"(https?://\S+|www\.\S+|bit\.ly/\S+|tinyurl\.com/\S+)", text)
+    if urls:
+        real_url, is_bad = unroll_url(urls[0])
         link_intel = {
-            "risk": "High",
-            "age": "2 days old (Suspect)",
-            "warning": "This link was recently registered. Avoid clicking!"
+            "risk": "Very High" if is_bad else ("High" if "bit.ly" in urls[0] or "tinyurl" in urls[0] else "Medium"),
+            "original": urls[0],
+            "unmasked": real_url,
+            "warning": "Suspicious destination (.ru/.cn/.xyz) detected!" if is_bad else "Shortened link detected. Proceed with caution."
         }
+        if is_bad: scam_score += 15 
 
     # 6. Safety Action Plan
     action_plan = []
@@ -143,13 +160,38 @@ def analyze_text(text):
         ]
 
     # 7. Hinglish Message for Audio Assistant (Checklist 4)
-    hinglish_msg = f"Alert! Yeh message ek {status} lag raha hai. "
     if status == "Scam":
+        hinglish_msg = f"Alert! Yeh message ek Scam lag raha hai. "
         hinglish_msg += "Kripya karkey koi link click na karein. Yeh fraud ho sakta hai."
     elif status == "Suspicious":
+        hinglish_msg = f"Alert! Yeh message ek Suspicious lag raha hai. "
         hinglish_msg += "Hoshiyaar rahein. Yeh suspicious signals de raha hai."
     else:
-        hinglish_msg += "Filhal yeh safe lag raha hai. But savvy rahiye."
+        hinglish_msg = "Alert! Yeh message abhi safe lag raha hai, lekin kripya saavdhan rahein."
+
+    # 8. Risky Segments for Heatmap
+    risky_segments = []
+    patterns_to_check = {
+        r"accident|hospital|emergency|police|arrest|jail|family|relative": "EMOTIONAL_MANIPULATION",
+        r"premium rate|090|098|0871|0844": "PREMIUM_NUMBER",
+        r"bank|account|pan|aadhar|kyc|otp|verify|withdraw|transfer": "SENSITIVE_DATA",
+        r"bill|electricity|bijli|disconnect|cut": "SERVICE_THREAT",
+        r"part-time|job|earn|commission|salary": "JOB_SCAM",
+        r"win|won|lottery|prize|gift|reward|rupee|ruppee": "FINANCIAL_BAIT",
+        r"customs|unclaimed|parcel|police|fine": "AUTHORITY_IMPERSONATION",
+        r"urgent|immediately|now|asap|deadline|soon": "URGENCY",
+        r"(https?://\S+|www\.\S+|bit\.ly/\S+|tinyurl\.com/\S+)": "EXTERNAL_LINK"
+    }
+    
+    for pattern, risk_type in patterns_to_check.items():
+        matches = re.finditer(pattern, lower_text, re.IGNORECASE)
+        for match in matches:
+            risky_segments.append({
+                "segment": text[match.start():match.end()],
+                "type": risk_type,
+                "start": match.start(),
+                "end": match.end()
+            })
 
     return {
         "status": status,
@@ -160,7 +202,9 @@ def analyze_text(text):
         "ai_score": ai_score,
         "message": hinglish_msg,
         "link_intel": link_intel,
-        "action_plan": action_plan
+        "action_plan": action_plan,
+        "analyzed_text": text,
+        "risky_segments": risky_segments
     }
 
 

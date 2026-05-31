@@ -26,18 +26,21 @@ scam_samples = [
     }
 ]
 
-print(f"{'TYPE':<25} | {'STATUS':<10} | {'SCORE':<5} | {'WHY (FIRST 2)'}")
-print("-" * 80)
+with open("accuracy_report.txt", "w") as f:
+    f.write(f"{'TYPE':<25} | {'STATUS':<10} | {'SCORE':<5} | {'WHY (FIRST 2)'}\n")
+    f.write("-" * 80 + "\n")
+    
+    for sample in scam_samples:
+        try:
+            response = requests.post(url, json={"text": sample["text"]})
+            result = response.json()
+            status = result.get("status", "N/A")
+            score = result.get("scam_score", 0)
+            why = ", ".join(result.get("why", [])[:2])
+            line = f"{sample['type']:<25} | {status:<10} | {score:<5} | {why}\n"
+            print(line.strip())
+            f.write(line)
+        except Exception as e:
+            f.write(f"{sample['type']:<25} | ERROR: {e}\n")
 
-for sample in scam_samples:
-    try:
-        response = requests.post(url, json={"text": sample["text"]})
-        result = response.json()
-        status = result.get("status", "N/A")
-        score = result.get("scam_score", 0)
-        why = ", ".join(result.get("why", [])[:2])
-        print(f"{sample['type']:<25} | {status:<10} | {score:<5} | {why}")
-    except Exception as e:
-        print(f"{sample['type']:<25} | ERROR: {e}")
-
-print("\nBatch test complete.")
+print("\nBatch test complete. Results saved to accuracy_report.txt")
